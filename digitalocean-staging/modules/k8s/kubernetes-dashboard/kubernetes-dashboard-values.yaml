@@ -1,0 +1,15 @@
+labels:
+  app: kubernetes-dashboard
+
+ingress:
+  enabled: true
+  labels:
+    app: kubernetes-dashboard
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - kubernetes-dashboard.${domain_name}
+
+rbac:
+  clusterAdminRole: true

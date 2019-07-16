@@ -1,0 +1,109 @@
+accessLogs:
+  enabled: true
+
+acme:
+  challengeType: "dns-01"
+  dnsProvider:
+    name: digitalocean
+    DO_AUTH_TOKEN: "${do_token}"
+  domains:
+    enabled: true
+    domainsList:
+      - main: "*.${domain_name}"
+      - sans:
+        - "${domain_name}"
+  email: "${acme_email}"
+  enabled: true
+  logging: true
+  onHostRule: true
+  persistence:
+    enabled: false
+  staging: false
+
+autoscaling:
+  minReplicas: "${replicas}"
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 60
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: 60
+
+dashboard:
+  domain: "traefik-dashboard.${domain_name}"
+  enabled: true
+  ingress:
+    annotations:
+      kubernetes.io/ingress.class: "traefik"
+      kubernetes.io/tls-acme: "true"
+    labels:
+      app: traefik-dashboard
+  service:
+    labels:
+      app: traefik-dashboard
+
+debug:
+  enabled: true
+
+externalTrafficPolicy: Local
+
+forwardedHeaders:
+  enabled: true
+  trustedIPs:
+    - 0.0.0.0/0
+
+kubernetes:
+  ingressEndpoint:
+    publishedService: "kube-system/traefik"
+
+kvprovider:
+  storeAcme: true
+  consul:
+    endpoint: "consul:8500"
+    prefix: traefik
+    watch: true
+
+logLevel: debug
+
+rbac:
+  enabled: true
+
+replicas: "${replicas}"
+
+resources:
+  limits:
+    cpu: 400m
+    memory: 300Mi
+  requests:
+    cpu: 200m
+    memory: 100Mi
+
+ssl:
+  cipherSuites: [
+    "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+    "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+    "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305",
+    "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305",
+    "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+    "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+    "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+    "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"
+  ]
+  enabled: true
+  enforced: true
+  tlsMinVersion: VersionTLS12
+
+startupArguments:
+  - "--api"
+  - "--kubernetes"
+  - "--logLevel=INFO"
+  - "--ping"
+  - "--ping.entrypoint=http"
+  - "--entryPoints=Name:https Address::443 TLS Compress:true"
+  - "--entryPoints=Name:http Address::80 Compress:true Redirect.EntryPoint:https"
+  - "--defaultentrypoints=https"
+  - "--kubernetes.ingressEndpoint=true"

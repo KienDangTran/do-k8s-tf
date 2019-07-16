@@ -1,0 +1,1 @@
+* Setup a single node docker swarm clust on local machine
