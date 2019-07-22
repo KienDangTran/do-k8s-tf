@@ -1,4 +1,4 @@
-variable "namespace" {}
+# variable "namespace" {}
 
 # resource "kubernetes_config_map" "postgre_config" {
 #   metadata {

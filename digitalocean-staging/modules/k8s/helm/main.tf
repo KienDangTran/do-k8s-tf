@@ -2,6 +2,7 @@ variable "host" {}
 variable "client_cert" {}
 variable "client_key" {}
 variable "cluster_ca_cert" {}
+variable "do_token" {}
 
 ################################################################################
 
@@ -45,4 +46,20 @@ provider "helm" {
     client_key             = "${var.client_key}"
     cluster_ca_certificate = "${var.cluster_ca_cert}"
   }
+}
+
+resource "kubernetes_secret" "digitalocean_dns" {
+  metadata {
+    name      = "digitalocean-dns"
+    namespace = "kube-system"
+  }
+
+  data = {
+    access-token = "${var.do_token}"
+  }
+}
+
+output "tiller_secret_name" {
+  description = "Name of the default secret, containing service account token, created & managed by the service."
+  value       = "${kubernetes_service_account.tiller.default_secret_name}"
 }

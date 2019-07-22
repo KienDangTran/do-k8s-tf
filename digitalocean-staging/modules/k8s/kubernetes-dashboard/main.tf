@@ -2,6 +2,7 @@ variable "domain_name" {
   description = "Root domain name for the stack"
   type        = "string"
 }
+variable "tiller_secret_name" {}
 
 ################################################################################
 

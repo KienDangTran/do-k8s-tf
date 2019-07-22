@@ -18,7 +18,7 @@ acme:
   onHostRule: true
   persistence:
     enabled: false
-  staging: false
+  staging: true
 
 autoscaling:
   minReplicas: "${replicas}"
@@ -38,13 +38,14 @@ dashboard:
   enabled: true
   ingress:
     annotations:
-      kubernetes.io/ingress.class: "traefik"
-      kubernetes.io/tls-acme: "true"
-    labels:
-      app: traefik-dashboard
-  service:
-    labels:
-      app: traefik-dashboard
+    certmanager.k8s.io/acme-challenge-type: dns01
+    certmanager.k8s.io/cluster-issuer: "letsencrypt"
+    kubernetes.io/ingress.class: "traefik"
+    kubernetes.io/tls-acme: "true"
+    tls:
+    - hosts:
+      - "traefik-dashboard.${domain_name}"
+      secretName: acme-crt-secret
 
 debug:
   enabled: true
@@ -63,7 +64,7 @@ kubernetes:
 kvprovider:
   storeAcme: true
   consul:
-    endpoint: "consul:8500"
+    endpoint: "${consul_endpoint}"
     prefix: traefik
     watch: true
 
@@ -100,10 +101,11 @@ ssl:
 startupArguments:
   - "--api"
   - "--kubernetes"
-  - "--logLevel=INFO"
+  - "--logLevel=DEBUG"
   - "--ping"
   - "--ping.entrypoint=http"
   - "--entryPoints=Name:https Address::443 TLS Compress:true"
   - "--entryPoints=Name:http Address::80 Compress:true Redirect.EntryPoint:https"
   - "--defaultentrypoints=https"
   - "--kubernetes.ingressEndpoint=true"
+  - "--kubernetes.ingressEndpoint.publishedService=kube-system/traefik"

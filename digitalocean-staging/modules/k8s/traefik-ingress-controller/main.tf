@@ -1,30 +1,14 @@
-variable "acme_email" {
-  description = "Admin e-mail for Let's Encrypt"
-  type        = "string"
-}
-variable "domain_name" {
-  description = "Root domain name for the stack"
-  type        = "string"
-}
+variable "acme_email" {}
+variable "domain_name" {}
 variable "do_token" {}
 variable "hostname" {}
+variable "tiller_secret_name" {}
+variable "consul_endpoint" {}
 variable "replicas" {
   default = 2
 }
 
-
-################################################################################
-
-# Consul helm chart.
-resource "helm_release" "consul" {
-  chart         = "stable/consul"
-  force_update  = true
-  name          = "consul"
-  namespace     = "kube-system"
-  recreate_pods = true
-  reuse_values  = true
-}
-
+# Traefik helm chart.
 data "template_file" "traefik_values" {
   template = "${file("${path.module}/traefik-values.yaml")}"
   vars = {
@@ -33,13 +17,11 @@ data "template_file" "traefik_values" {
     acme_email  = "${var.acme_email}"
     replicas    = "${var.replicas}"
     hostname    = "${var.hostname}"
+    consul_endpoint = "${var.consul_endpoint}"
   }
 }
 
-# Traefik helm chart.
 resource "helm_release" "traefik" {
-  depends_on = ["helm_release.consul"]
-
   chart         = "stable/traefik"
   force_update  = true
   name          = "traefik"

@@ -1,0 +1,20 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: acme-crt
+  namespace: kube-system
+spec:
+  secretName: acme-crt-secret
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  commonName: '*.staging.3bwins.net'
+  dnsNames:
+  - staging.3bwins.net
+  acme:
+    config:
+    - dns01:
+        provider: digitalocean-dns
+      domains:
+      - '*.staging.3bwins.net'
+      - staging.3bwins.net

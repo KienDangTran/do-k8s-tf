@@ -1,16 +1,18 @@
-ingress:
-  enabled: true
+uiIngress:
   annotations:
     certmanager.k8s.io/acme-challenge-type: dns01
     certmanager.k8s.io/cluster-issuer: "letsencrypt"
     kubernetes.io/ingress.class: "traefik"
     kubernetes.io/tls-acme: "true"
+  enabled: true
   hosts:
-    - kubernetes-dashboard.${domain_name}
+    - "consul-ui.${domain_name}"
+  labels:
+    app: consul-ui
   tls:
     - hosts:
       - "consul-ui.${domain_name}"
       secretName: acme-crt-secret
 
-rbac:
-  clusterAdminRole: true
+uiService:
+  type: ClusterIP

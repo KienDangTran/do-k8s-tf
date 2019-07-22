@@ -8,7 +8,7 @@ variable "ssh_pub_key" {
 
 variable "domain_name" {
   description = "Root domain name for the stack"
-  default     = "staging.3bwins.com"
+  default     = "staging.3bwins.net"
 }
 
 variable "acme_email" {

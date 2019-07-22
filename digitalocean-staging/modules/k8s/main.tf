@@ -14,7 +14,7 @@ variable "domain_name" {
 resource "digitalocean_kubernetes_cluster" "staging_3bwins" {
   name    = "staging-3bwins"
   region  = "sgp1"
-  version = "1.14.3-do.0"
+  version = "1.14.4-do.0"
   tags    = ["staging"]
 
   node_pool {
@@ -40,37 +40,30 @@ module "helm" {
   client_cert     = "${base64decode(digitalocean_kubernetes_cluster.staging_3bwins.kube_config.0.client_certificate)}"
   client_key      = "${base64decode(digitalocean_kubernetes_cluster.staging_3bwins.kube_config.0.client_key)}"
   cluster_ca_cert = "${base64decode(digitalocean_kubernetes_cluster.staging_3bwins.kube_config.0.cluster_ca_certificate)}"
+  do_token        = "${var.do_token}"
+}
+
+module "consul" {
+  source = "./consul"
+
+  domain_name        = "${var.domain_name}"
+  tiller_secret_name = "${module.helm.tiller_secret_name}"
 }
 
 module "traefik_ingress_controller" {
   source = "./traefik-ingress-controller"
 
-  acme_email  = "${var.acme_email}"
-  do_token    = "${var.do_token}"
-  domain_name = "${var.domain_name}"
-  hostname    = "${digitalocean_kubernetes_cluster.staging_3bwins.endpoint}"
+  acme_email         = "${var.acme_email}"
+  do_token           = "${var.do_token}"
+  domain_name        = "${var.domain_name}"
+  hostname           = "${digitalocean_kubernetes_cluster.staging_3bwins.endpoint}"
+  consul_endpoint    = "${module.consul.consul_endpoint}"
+  tiller_secret_name = "${module.helm.tiller_secret_name}"
 }
 
 module "kubernetes_dashboard" {
   source = "./kubernetes-dashboard"
 
-  domain_name = "${var.domain_name}"
+  domain_name        = "${var.domain_name}"
+  tiller_secret_name = "${module.helm.tiller_secret_name}"
 }
-
-
-
-# resource "kubernetes_namespace" "app_staging" {
-#   metadata {
-#     annotations = {
-#       name = "app-staging"
-#     }
-#     labels = {
-#       profile = "staging"
-#     }
-#     name = "app-staging"
-#   }
-# }
-# module "deployments" {
-#   source    = "./deployments"
-#   namespace = "${kubernetes_namespace.app_staging.metadata.0.name}"
-# }
