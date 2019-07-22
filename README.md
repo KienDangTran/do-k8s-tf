@@ -1,4 +1,5 @@
 # Kubernetes cluster up & running using Terraform
+**NOTE: This is NOT production-ready**
 ## Prerequisite:
 - A billing Digital Ocean account
 - A valid domain name
@@ -29,8 +30,12 @@ go version go1.12.7 darwin/amd64
 ```
 
 ## Steps:
-```sh
+- Create a project on Digital Ocean
 
+- Create a `Personal access tokens` (project's dashboad > `API` menu > `Tokens/Keys` tab)
+
+- Clone this repo & run:
+```sh
 $ export DO_TOKEN=...
 
 $ doctl auth init -t $DO_TOKEN
@@ -66,9 +71,9 @@ $ terraform apply "terraform.tfplan"
 
 *Optional*: Import certificate to access kiubernetes dashboard
 ```sh
-$ grep 'client-key-data' staging-3bwins-kubeconfig.yaml | head -n 1 | awk '{print $2}' | base64 -D >> kubecfg.key
+$ grep 'client-key-data' <configuration_file_name> | head -n 1 | awk '{print $2}' | base64 -D >> kubecfg.key
 
-$ grep 'client-certificate-data' staging-3bwins-kubeconfig.yaml | head -n 1 | awk '{print $2}' | base64 -D >> kubecfg.crt
+$ grep 'client-certificate-data' <configuration_file_name> | head -n 1 | awk '{print $2}' | base64 -D >> kubecfg.crt
 
 $ openssl pkcs12 -export -clcerts -inkey kubecfg.key -in kubecfg.crt -out kubecfg.p12 -name "kubernetes-client"
 ```
